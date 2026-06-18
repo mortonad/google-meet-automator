@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google會議自動化助理 ｜ 簡報版</title>
+  <style>
+    :root {
+      --ink: #15203a;
+      --sub: #5b6675;
+      --line: #e6e9ef;
+      --brand: #2563eb;
+      --brand2: #0ea5a4;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background: #0b1020;
+      color: var(--ink);
+    }
+
+    .deck {
+      position: fixed;
+      inset: 0;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      padding: 7vh 9vw;
+      background: #f7f8fa;
+    }
+
+    .slide.on {
+      display: flex;
+      animation: in .5s ease both;
+    }
+
+    @keyframes in {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* 標題頁 */
+    .title {
+      background: linear-gradient(135deg, #1e3a8a, #0ea5a4);
+      color: #fff;
+    }
+
+    .title .tag {
+      display: inline-block;
+      background: rgba(255, 255, 255, .18);
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: clamp(13px, 1.6vw, 16px);
+      margin-bottom: 24px;
+      width: max-content;
+    }
+
+    .title h1 {
+      font-size: clamp(30px, 5.2vw, 60px);
+      line-height: 1.25;
+    }
+
+    .title p {
+      font-size: clamp(15px, 2.1vw, 22px);
+      margin-top: 22px;
+      opacity: .95;
+      max-width: 42ch;
+    }
+
+    .title .by {
+      margin-top: 34px;
+      font-size: clamp(12px, 1.5vw, 15px);
+      opacity: .85;
+    }
+
+    .kick {
+      color: var(--brand);
+      font-weight: 700;
+      font-size: clamp(13px, 1.7vw, 16px);
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: clamp(24px, 3.6vw, 40px);
+      line-height: 1.3;
+      margin-bottom: 22px;
+    }
+
+    .lead {
+      font-size: clamp(15px, 2.1vw, 22px);
+      color: var(--sub);
+      max-width: 46ch;
+    }
+
+    .lead b {
+      color: var(--ink);
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    li {
+      font-size: clamp(15px, 2vw, 21px);
+      margin: 12px 0;
+      padding-left: 30px;
+      position: relative;
+    }
+
+    li:before {
+      content: "▹";
+      color: var(--brand);
+      position: absolute;
+      left: 0;
+    }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: stretch;
+      margin-top: 8px;
+    }
+
+    .step {
+      flex: 1;
+      min-width: 150px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .step .n {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--brand);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .step b {
+      font-size: clamp(15px, 1.9vw, 19px);
+    }
+
+    .step span {
+      display: block;
+      color: var(--sub);
+      font-size: clamp(12px, 1.5vw, 15px);
+      margin-top: 6px;
+    }
+
+    .shot {
+      flex: 1;
+      min-height: 38vh;
+      background: #e9eef5;
+      border: 1px dashed #b9c4d4;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #7e8ba0;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .shot small {
+      margin-top: 10px;
+      color: #a6b1c2;
+      font-size: 13px;
+    }
+
+    .shot img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px; display: block; }
+
+    .cap {
+      margin-top: 18px;
+      font-size: clamp(16px, 2.2vw, 24px);
+    }
+
+    .cap b {
+      color: var(--brand);
+    }
+
+    .res {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      justify-content: center;
+    }
+
+    /* 實際成果：放大圖框（拉長＋加寬，讓截圖盡量大）*/
+    .slide.shotbig { padding: 4vh 5vw; }
+    .slide.shotbig .kick { margin-bottom: 6px; }
+    .slide.shotbig .shot { min-height: 66vh; }
+    .slide.shotbig .cap { margin-top: 12px; font-size: clamp(15px, 2vw, 22px); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 6px;
+    }
+
+    .ben {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .ben .ic {
+      font-size: 26px;
+    }
+
+    .ben b {
+      display: block;
+      margin: 8px 0 4px;
+      font-size: clamp(15px, 1.8vw, 19px);
+    }
+
+    .ben span {
+      color: var(--sub);
+      font-size: clamp(12px, 1.5vw, 15px);
+    }
+
+    .tech {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 22px;
+      font-size: clamp(14px, 1.9vw, 19px);
+      color: var(--sub);
+      max-width: 60ch;
+    }
+
+    .tech b {
+      color: var(--ink);
+    }
+
+    .note {
+      color: #b45309;
+      font-size: clamp(12px, 1.5vw, 15px);
+      margin-top: 12px;
+    }
+
+    /* 控制列 */
+    .ctrl {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      z-index: 9;
+      background: rgba(15, 20, 35, .78);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 99px;
+      font-size: 14px;
+    }
+
+    .ctrl button {
+      background: transparent;
+      border: 0;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 2px 6px;
+    }
+
+    .ctrl button:hover {
+      color: #7dd3fc;
+    }
+
+    .pg {
+      font-variant-numeric: tabular-nums;
+      opacity: .9;
+    }
+
+    .fs {
+      position: fixed;
+      top: 16px;
+      right: 18px;
+      z-index: 9;
+      background: rgba(15, 20, 35, .78);
+      color: #fff;
+      border: 0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .hint {
+      position: fixed;
+      top: 16px;
+      left: 18px;
+      z-index: 9;
+      color: #9aa4b2;
+      font-size: 12px;
+    }
+
+    /* 兩欄版面 */
+    .slide.split {
+      flex-direction: row;
+      align-items: center;
+      gap: 5vw;
+    }
+
+    .split .col-l {
+      flex: 1.25;
+    }
+
+    .split .col-r {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    @media(max-width:820px) {
+      .slide.split {
+        flex-direction: column;
+        gap: 3vh;
+      }
+
+      .split .col-r {
+        width: 100%;
+      }
+    }
+
+    /* 標題頁品牌卡 */
+    .brandcard {
+      background: #fff;
+      border-radius: 22px;
+      padding: 28px 34px;
+      text-align: center;
+      box-shadow: 0 22px 55px rgba(0, 0, 0, .22);
+    }
+
+    .brandcard svg {
+      width: 118px;
+      height: 118px;
+    }
+
+    .brandcard .bt {
+      color: #8a93a3;
+      font-size: 12px;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .brandcard .bn {
+      margin-top: 10px;
+      font-weight: 800;
+      color: #15203a;
+      font-size: 20px;
+    }
+
+    .brandcard .bn span {
+      color: #0ea5a4;
+      font-weight: 500;
+    }
+
+    /* 進化視覺 */
+    .evo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .evo .it {
+      text-align: center;
+    }
+
+    .evo svg {
+      width: 80px;
+      height: 80px;
+    }
+
+    .evo .it small {
+      display: block;
+      color: var(--sub);
+      font-size: 12px;
+      margin-top: 6px;
+      line-height: 1.3;
+    }
+
+    .evo .ar {
+      font-size: 30px;
+      color: #94a3b8;
+    }
+
+    .phshot {
+      width: 100%;
+      min-height: 22vh;
+      background: #e9eef5;
+      border: 1px dashed #b9c4d4;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #7e8ba0;
+      font-size: 13px;
+      text-align: center;
+      padding: 16px;
+    }
+
+    /* 圖標框 */
+    .iconframe {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 32px;
+      box-shadow: 0 12px 34px rgba(20, 30, 60, .07);
+    }
+
+    .iconframe svg {
+      width: 168px;
+      height: 168px;
+    }
+
+    /* 之前→現在 */
+    .ba li {
+      font-size: clamp(15px, 1.9vw, 20px);
+      margin: 16px 0;
+      padding-left: 0;
+    }
+
+    .ba li:before {
+      content: none;
+    }
+
+    .ba .b {
+      color: #8a93a3;
+    }
+
+    .ba .ar {
+      color: #0ea5a4;
+      font-weight: 700;
+      margin: 0 8px;
+    }
+
+    .ba .a {
+      color: #15203a;
+      font-weight: 700;
+    }
+
+    /* 實際成果：手機直式截圖框（自動貼合截圖比例）*/
+    .shotwrap { display: flex; justify-content: center; align-items: center; }
+    .phone { height: 70vh; max-height: 600px; width: fit-content; min-width: 32vh; background: #e9eef5; border: 1px dashed #b9c4d4; border-radius: 26px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #7e8ba0; text-align: center; padding: 14px; overflow: hidden; }
+    .phone small { margin-top: 8px; color: #a6b1c2; font-size: 12px; line-height: 1.4; }
+    .phone img { height: 100%; width: auto; max-width: 46vw; object-fit: contain; border-radius: 14px; display: block; }
+    .capside { flex: 1; }
+    .capside .kick { margin-bottom: 14px; }
+    .capside .cap { margin-top: 0; }
+  </style>
+</head>
+
+<body>
+  <div class="hint">← → 或空白鍵翻頁</div>
+  <button class="fs" onclick="fs()">⛶ 全螢幕</button>
+
+  <div class="deck" id="deck">
+
+    <section class="slide title split on">
+      <div class="col-l">
+        <span class="tag">Google 生態系 · 自動化助理</span>
+        <h1>Google會議自動化助理<br>開完會，紀錄與待辦自己長出來</h1>
+        <p>把錄音丟進 Google Drive → 背景自動產出會議紀錄（摘要／決議／待辦）+ Google Tasks 待辦。</p>
+        <div class="by">開發者：Morton Lin</div>
+      </div>
+      <div class="col-r">
+        <div class="brandcard">
+          <div class="bt">PRODUCT BY</div>
+          <svg viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="gB" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#1e3a8a" />
+                <stop offset="1" stop-color="#0ea5a4" />
+              </linearGradient>
+            </defs>
+            <path d="M26 88 V38 L60 70 L94 38 V88" stroke="url(#gB)" stroke-width="9" fill="none" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <circle cx="26" cy="38" r="6.5" fill="#1e3a8a" />
+            <circle cx="94" cy="38" r="6.5" fill="#0ea5a4" />
+            <circle cx="60" cy="70" r="5" fill="#0ea5a4" />
+          </svg>
+          <div class="bn">Morton<span> AI Automation</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide split">
+      <div class="col-l">
+        <div class="kick">為什麼做</div>
+        <h2>從一個轉錄小工具，長成自動化引擎</h2>
+        <p class="lead">我習慣把繁瑣流程「系統化」。先做了 <b>Vido-STT</b>（Colab 轉錄工具），但很快發現：<b>轉錄只是第一步，真正花時間的是「會後整理」</b>。於是把它升級成全自動的
+          Google 生態系自動化工作流。</p>
+      </div>
+      <div class="col-r">
+        <div class="evo">
+          <div class="it">
+            <svg viewBox="0 0 120 120">
+              <defs>
+                <linearGradient id="gV" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#1e3a8a" />
+                  <stop offset="1" stop-color="#0ea5a4" />
+                </linearGradient>
+              </defs>
+              <rect x="6" y="6" width="108" height="108" rx="26" fill="url(#gV)" />
+              <path d="M49 28 l22 13 l-22 13 z" fill="#fff" />
+              <rect x="26" y="64" width="68" height="34" rx="9" fill="#fff" />
+              <rect x="35" y="74" width="38" height="4.5" rx="2.25" fill="#0ea5a4" />
+              <rect x="35" y="85" width="24" height="4.5" rx="2.25" fill="#cbd5e1" />
+            </svg>
+            <small>VidoSTT<br>（Colab 轉錄）</small>
+          </div>
+          <div class="ar">→</div>
+          <div class="it">
+            <svg viewBox="0 0 120 120">
+              <defs>
+                <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#1e3a8a" />
+                  <stop offset="1" stop-color="#0ea5a4" />
+                </linearGradient>
+              </defs>
+              <rect x="6" y="6" width="108" height="108" rx="26" fill="url(#gA)" />
+              <g fill="#fff">
+                <rect x="28" y="52" width="6" height="16" rx="3" />
+                <rect x="38" y="44" width="6" height="32" rx="3" />
+                <rect x="48" y="36" width="6" height="48" rx="3" />
+              </g>
+              <path d="M63 60 h12 m-4 -4 l4 4 l-4 4" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <rect x="80" y="40" width="24" height="40" rx="5" fill="#fff" />
+              <rect x="85" y="47" width="14" height="3" rx="1.5" fill="#cbd5e1" />
+              <rect x="85" y="54" width="10" height="3" rx="1.5" fill="#cbd5e1" />
+              <path d="M85 66 l4 4 l9 -11" stroke="#0ea5a4" stroke-width="3.5" fill="none" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+            <small>Google會議<br>自動化助理</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide split">
+      <div class="col-l">
+        <div class="kick">成效</div>
+        <h2>他解決了</h2>
+        <ul class="ba">
+          <li><span class="b">會後 30–45 分鐘整理、追待辦</span><span class="ar">→</span><span class="a">現在幾分鐘自動產出</span></li>
+          <li><span class="b">常漏決議、資訊散落</span><span class="ar">→</span><span class="a">決議／待辦結構化、不漏接</span></li>
+          <li><span class="b">換人離職、知識消失</span><span class="ar">→</span><span class="a">紀錄留在 Drive、知識不流失</span></li>
+        </ul>
+      </div>
+      <div class="col-r">
+        <div class="iconframe">
+          <svg viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="gC" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#1e3a8a" />
+                <stop offset="1" stop-color="#0ea5a4" />
+              </linearGradient>
+            </defs>
+            <circle cx="32" cy="40" r="6" fill="#94a3b8" />
+            <circle cx="30" cy="62" r="6" fill="#94a3b8" />
+            <circle cx="36" cy="82" r="6" fill="#94a3b8" />
+            <path d="M42 44 C66 40 66 70 88 60" stroke="url(#gC)" stroke-width="6" fill="none" stroke-linecap="round" />
+            <path d="M40 64 H86" stroke="url(#gC)" stroke-width="6" fill="none" stroke-linecap="round" opacity=".5" />
+            <path d="M44 82 C70 86 72 64 90 60" stroke="url(#gC)" stroke-width="6" fill="none" stroke-linecap="round"
+              opacity=".7" />
+            <circle cx="92" cy="60" r="9" fill="url(#gC)" />
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kick">運作方式</div>
+      <h2>四步，全自動</h2>
+      <div class="flow">
+        <div class="step">
+          <div class="n">1</div><b>丟錄音進 Drive</b><span>放進指定資料夾</span>
+        </div>
+        <div class="step">
+          <div class="n">2</div><b>自動偵測</b><span>Apps Script 每 5 分鐘掃描</span>
+        </div>
+        <div class="step">
+          <div class="n">3</div><b>AI 分析</b><span>Gemini Multi-Agent：摘要／決議／待辦</span>
+        </div>
+        <div class="step">
+          <div class="n">4</div><b>自動產出</b><span>Doc + Tasks + Email</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide shotbig">
+      <div class="res">
+        <div class="kick">實際成果 1／5</div>
+        <div class="shot"><img src="shot1.png" alt="會議錄音"></div>
+        <div class="cap"><b>Step 1</b>　一場真實會議的錄音——準備交給系統。</div>
+      </div>
+    </section>
+
+    <section class="slide shotbig">
+      <div class="res">
+        <div class="kick">實際成果 2／5</div>
+        <div class="shot"><img src="shot2.png" alt="上傳到 Drive"></div>
+        <div class="cap"><b>Step 2</b>　上傳到指定的 Drive 資料夾——我沒有按任何「開始處理」。</div>
+      </div>
+    </section>
+
+    <section class="slide shotbig">
+      <div class="res">
+        <div class="kick">實際成果 3／5</div>
+        <div class="shot"><img src="shot3.png" alt="自動產出的會議紀錄"></div>
+        <div class="cap"><b>Step 3</b>　幾分鐘後自動長出會議紀錄：摘要、決策、待辦。</div>
+      </div>
+    </section>
+
+    <section class="slide shotbig">
+      <div class="res">
+        <div class="kick">實際成果 4／5</div>
+        <div class="shot"><img src="shot4.png" alt="Google Tasks 待辦"></div>
+        <div class="cap"><b>Step 4</b>　每條待辦自動進到負責人的 Google Tasks，帶截止日。</div>
+      </div>
+    </section>
+
+    <section class="slide shotbig">
+      <div class="res">
+        <div class="kick">實際成果 5／5</div>
+        <div class="shot"><img src="shot5.png" alt="完成通知 Email"></div>
+        <div class="cap"><b>Step 5</b>　處理完成自動寄出 Email 通知——全程零人工。</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kick">價值</div>
+      <h2>優點</h2>
+      <div class="grid">
+        <div class="ben">
+          <div class="ic">⏱️</div><b>1 小時以下會議，背景自動處理</b><span>丟進去就走，幾分鐘出結果</span>
+        </div>
+        <div class="ben">
+          <div class="ic">🗂️</div><b>每場獨立</b><span>各自資料夾／Doc／待辦清單，不混</span>
+        </div>
+        <div class="ben">
+          <div class="ic">💰</div><b>零伺服器</b><span>用現有 Google Workspace，不用養 IT</span>
+        </div>
+        <div class="ben">
+          <div class="ic">🔁</div><b>全自動</b><span>每 5 分鐘自動掃，連按都不用</span>
+        </div>
+        <div class="ben">
+          <div class="ic">🔒</div><b>資料在你自己帳號</b><span>產出留在你的 Drive</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kick">技術</div>
+      <h2>技術棧</h2>
+      <div class="tech">
+        <b>Google Apps Script</b>（事件驅動排程）+ <b>Gemini</b>（Multi-Agent Prompt，結構化 JSON）+ <b>Drive / Docs / Tasks API</b> +
+        Gmail 通知。
+        <div class="note">※ 誠實標示：已端到端運行＝Google 生態系路徑；Microsoft 365 版架構已設計、整合進行中。</div>
+      </div>
+    </section>
+
+    <section class="slide title">
+      <h1>一套引擎，套用各種場景</h1>
+      <p>任何「語音／會議 → 結構化知識 + 待辦」都能用。</p>
+      <div class="by">聯絡：你的 email　·　Demo／GitHub：連結待補　·　Morton Lin</div>
+    </section>
+
+  </div>
+
+  <div class="ctrl">
+    <button onclick="move(-1)">‹</button>
+    <span class="pg"><span id="now">1</span> / <span id="tot">1</span></span>
+    <button onclick="move(1)">›</button>
+  </div>
+
+  <script>
+    var slides = document.querySelectorAll('.slide'); var cur = 0;
+    document.getElementById('tot').textContent = slides.length;
+    function show(i) { slides[cur].classList.remove('on'); cur = Math.max(0, Math.min(slides.length - 1, i)); slides[cur].classList.add('on'); document.getElementById('now').textContent = cur + 1; }
+    function move(s) { show(cur + s); }
+    function fs() { var d = document.documentElement; if (!document.fullscreenElement) { d.requestFullscreen && d.requestFullscreen(); } else { document.exitFullscreen && document.exitFullscreen(); } }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); move(1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); move(-1); }
+      else if (e.key === 'Home') { show(0); } else if (e.key === 'End') { show(slides.length - 1); }
+      else if (e.key === 'f' || e.key === 'F') { fs(); }
+    });
+    document.getElementById('deck').addEventListener('click', function (e) { if (!e.target.closest('a')) move(1); });
+  </script>
+</body>
+
+</html>

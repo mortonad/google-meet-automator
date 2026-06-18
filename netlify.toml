@@ -1,0 +1,18 @@
+# Netlify 部署設定
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/"
+  to = "/Google會議自動化助理_手機直式.html"
+  status = 200
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
