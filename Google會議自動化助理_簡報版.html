@@ -202,7 +202,13 @@
       font-size: 13px;
     }
 
-    .shot img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px; display: block; }
+    .shot img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+      display: block;
+    }
 
     .cap {
       margin-top: 18px;
@@ -221,10 +227,22 @@
     }
 
     /* 實際成果：放大圖框（拉長＋加寬，讓截圖盡量大）*/
-    .slide.shotbig { padding: 4vh 5vw; }
-    .slide.shotbig .kick { margin-bottom: 6px; }
-    .slide.shotbig .shot { min-height: 66vh; }
-    .slide.shotbig .cap { margin-top: 12px; font-size: clamp(15px, 2vw, 22px); }
+    .slide.shotbig {
+      padding: 4vh 5vw;
+    }
+
+    .slide.shotbig .kick {
+      margin-bottom: 6px;
+    }
+
+    .slide.shotbig .shot {
+      min-height: 66vh;
+    }
+
+    .slide.shotbig .cap {
+      margin-top: 12px;
+      font-size: clamp(15px, 2vw, 22px);
+    }
 
     .grid {
       display: grid;
@@ -482,13 +500,57 @@
     }
 
     /* 實際成果：手機直式截圖框（自動貼合截圖比例）*/
-    .shotwrap { display: flex; justify-content: center; align-items: center; }
-    .phone { height: 70vh; max-height: 600px; width: fit-content; min-width: 32vh; background: #e9eef5; border: 1px dashed #b9c4d4; border-radius: 26px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #7e8ba0; text-align: center; padding: 14px; overflow: hidden; }
-    .phone small { margin-top: 8px; color: #a6b1c2; font-size: 12px; line-height: 1.4; }
-    .phone img { height: 100%; width: auto; max-width: 46vw; object-fit: contain; border-radius: 14px; display: block; }
-    .capside { flex: 1; }
-    .capside .kick { margin-bottom: 14px; }
-    .capside .cap { margin-top: 0; }
+    .shotwrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .phone {
+      height: 70vh;
+      max-height: 600px;
+      width: fit-content;
+      min-width: 32vh;
+      background: #e9eef5;
+      border: 1px dashed #b9c4d4;
+      border-radius: 26px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #7e8ba0;
+      text-align: center;
+      padding: 14px;
+      overflow: hidden;
+    }
+
+    .phone small {
+      margin-top: 8px;
+      color: #a6b1c2;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .phone img {
+      height: 100%;
+      width: auto;
+      max-width: 46vw;
+      object-fit: contain;
+      border-radius: 14px;
+      display: block;
+    }
+
+    .capside {
+      flex: 1;
+    }
+
+    .capside .kick {
+      margin-bottom: 14px;
+    }
+
+    .capside .cap {
+      margin-top: 0;
+    }
   </style>
 </head>
 
@@ -706,7 +768,7 @@
     <section class="slide title">
       <h1>一套引擎，套用各種場景</h1>
       <p>任何「語音／會議 → 結構化知識 + 待辦」都能用。</p>
-      <div class="by">聯絡：你的 email　·　Demo／GitHub：連結待補　·　Morton Lin</div>
+      <div class="by">聯絡：你的 email　·　Demo／GitHub：https://github.com/mortonad 　·　Morton Lin</div>
     </section>
 
   </div>
